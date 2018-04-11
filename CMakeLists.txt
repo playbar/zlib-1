@@ -4,6 +4,8 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 project(zlib)
 
+set(CMAKE_CXX_STANDARD 14)
+
 set(VERSION "1.2.11")
 
 option(ASM686 "Enable building i686 assembly implementation")

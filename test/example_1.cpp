@@ -7,10 +7,14 @@
 
 #include "zlib.h"
 #include <stdio.h>
+#include <fstream>
+using namespace std;
 
 #ifdef STDC
 #  include <string.h>
 #  include <stdlib.h>
+#include <iostream>
+
 #endif
 
 #if defined(VMS) || defined(RISCOS)
@@ -78,7 +82,15 @@ void test_compress(Byte *compr, uLong comprLen, Byte *uncompr, uLong uncomprLen)
     err = compress(compr, &comprLen, (const Bytef*)hello, len);
     CHECK_ERR(err, "compress");
 
+    ofstream fout;
+    fout.open("style_json.zip");
+    fout.write((char*)compr, comprLen);
+    fout.flush();
+    fout.close();
+
     strcpy((char*)uncompr, "garbage");
+
+
 
     err = uncompress(uncompr, &uncomprLen, compr, comprLen);
     CHECK_ERR(err, "uncompress");
@@ -508,7 +520,7 @@ void test_dict_inflate(Byte *compr, uLong comprLen, Byte *uncompr, uLong uncompr
  * Usage:  example [output.gz  [input.gz]]
  */
 
-int main(int argc, char *argv[])
+int main_2(int argc, char *argv[])
 {
     Byte *compr, *uncompr;
     uLong comprLen = 10000*sizeof(int); /* don't overflow on MSDOS */
@@ -523,8 +535,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "warning: different zlib version\n");
     }
 
-    printf("zlib version %s = 0x%04x, compile flags = 0x%lx\n",
-            ZLIB_VERSION, ZLIB_VERNUM, zlibCompileFlags());
+    printf("zlib version %s = 0x%04x, compile flags = 0x%lx\n", ZLIB_VERSION, ZLIB_VERNUM, zlibCompileFlags());
 
     compr    = (Byte*)calloc((uInt)comprLen, 1);
     uncompr  = (Byte*)calloc((uInt)uncomprLen, 1);
@@ -561,5 +572,145 @@ int main(int argc, char *argv[])
     free(compr);
     free(uncompr);
 
+    return 0;
+}
+
+int main_1()
+{
+    int err;
+    Byte compr[200],uncompr[200];
+    uLong comprLen,uncomprLen;
+    const char* hello = "1213135454646544665456465465457877874655312333131";
+
+    uLong len = strlen(hello)+1;
+    comprLen = sizeof(compr)/sizeof(compr[0]);
+
+    err = compress(compr,&comprLen,(const Bytef*)hello,len);
+
+    if(err != Z_OK){
+        exit(1);
+    }
+    std::cout<<"original size: "<<len<<" ,compressed size: "<<comprLen<<endl;
+    strcpy((char*)uncompr,"garbage");
+
+    err = uncompress(uncompr,&uncomprLen,compr,comprLen);
+    if(err != Z_OK){
+        cerr<<"uncompress error: "<<err<<endl;
+        exit(1);
+    }else
+    {
+        cout<<"uncompress() succeed: "<<endl;
+        cout<<(char*)uncompr<<endl;
+    }
+    return 0;
+}
+
+
+int compress_file(char * DestName,const char *SrcName)
+{
+    char SourceBuffer[102400] = {0};  //压缩文件时的源buffer
+
+    FILE* fp;  //打开欲压缩文件时文件的指针
+    FILE* fp1;  //创建压缩文件时的指针
+
+    errno_t err; //错误变量的定义
+
+    fp = fopen(SrcName,"rb");//打开欲压缩的文件
+    if(!fp)
+    {
+        printf("文件打开失败! \n");
+        return 1;
+    }
+
+    //获取文件长度
+    long cur = ftell(fp);
+    fseek(fp,0L,SEEK_END);
+    long fileLength = ftell(fp);
+    fseek(fp,cur,SEEK_SET);
+
+
+    //读取文件到buffer
+    fread(SourceBuffer,fileLength,1,fp);
+    fclose(fp);
+
+    //压缩buffer中的数据
+    uLongf SourceBufferLen=102400;
+    char* DestBuffer=(char*)::calloc((uInt)SourceBufferLen, 1);
+    err=compress((Bytef*)DestBuffer,(uLongf*)&SourceBufferLen,(const Bytef*)SourceBuffer,(uLongf)fileLength);
+    if(err!=Z_OK)
+    {
+        cout<<"压缩失败："<<err<<endl;
+        return 1;
+    }
+
+    //创建一个文件用来写入压缩后的数据
+    fp1 = fopen(DestName,"w+b");
+    if(!fp1)
+    {
+        printf("压缩文件创建失败! \n");
+        return 1 ;
+    }
+
+    fwrite(DestBuffer,SourceBufferLen,1,fp1);
+    fclose(fp1);
+    return 0;
+}
+
+
+int uncompress_file(char * DestName,const char *SrcName)
+{
+    char uSorceBuffer[102400] = {0};  //解压缩文件时的源buffer
+    FILE* fp3;  //打开欲解压文件的文件指针
+    FILE* fp4;  //创建解压文件的文件指针
+    errno_t err; //错误变量的定义
+    //打开欲解压的文件
+    fp3 = fopen(SrcName,"r+b");
+    if(!fp3)
+    {
+        printf("文件打开失败! \n");
+        return 1;
+    }
+
+    //获取欲解压文件的大小
+    long ucur = ftell(fp3);
+    fseek(fp3,0L,SEEK_END);
+    long ufileLength = ftell(fp3);
+    fseek(fp3,ucur,SEEK_SET);
+
+
+    //读取文件到buffer
+    fread(uSorceBuffer,ufileLength,1,fp3);
+    fclose(fp3);
+
+    uLongf uDestBufferLen=1024000;//此处长度需要足够大以容纳解压缩后数据
+    char* uDestBuffer=(char*)::calloc((uInt)uDestBufferLen, 1);
+    //解压缩buffer中的数据
+    err=uncompress((Bytef*)uDestBuffer,(uLongf*)&uDestBufferLen,(Bytef*)uSorceBuffer,(uLongf)ufileLength);
+
+    if(err!=Z_OK)
+    {
+        cout<<"解压缩失败："<<err<<endl;
+        return 1;
+    }
+
+    //创建一个文件用来写入解压缩后的数据
+    fp4 = fopen(DestName,"wb");
+    if(!fp4)
+    {
+        printf("解压缩文件创建失败! \n");
+        return 1 ;
+    }
+
+    printf("写入数据... \n");
+    fwrite(uDestBuffer,uDestBufferLen,1,fp4);
+    fclose(fp4);
+    return 0;
+}
+
+
+int main()
+{
+    compress_file("./1.zip","./zconf.h");
+    uncompress_file("./test.h","./1.zip");
     return 0;
 }
