@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 2.4.4)
+cmake_minimum_required(VERSION 3.6)
+
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
-project(zlib C)
+project(zlib)
 
 set(VERSION "1.2.11")
 
@@ -233,6 +234,10 @@ endif()
 add_executable(example test/example.c)
 target_link_libraries(example zlib)
 add_test(example example)
+
+add_executable(example_1 test/example_1.cpp)
+target_link_libraries(example_1 zlib)
+add_test(example_1 example_1)
 
 add_executable(minigzip test/minigzip.c)
 target_link_libraries(minigzip zlib)
