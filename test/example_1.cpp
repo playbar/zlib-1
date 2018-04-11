@@ -520,7 +520,7 @@ void test_dict_inflate(Byte *compr, uLong comprLen, Byte *uncompr, uLong uncompr
  * Usage:  example [output.gz  [input.gz]]
  */
 
-int main_2(int argc, char *argv[])
+int main_1(int argc, char *argv[])
 {
     Byte *compr, *uncompr;
     uLong comprLen = 10000*sizeof(int); /* don't overflow on MSDOS */

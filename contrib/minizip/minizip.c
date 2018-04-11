@@ -243,9 +243,7 @@ int isLargeFile(const char* filename)
  return largeFile;
 }
 
-int main(argc,argv)
-    int argc;
-    char *argv[];
+int main(int argc, char *argv[])
 {
     int i;
     int opt_overwrite=0;

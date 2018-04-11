@@ -244,6 +244,25 @@ add_test(example_1 example_1)
 add_executable(minigzip test/minigzip.c)
 target_link_libraries(minigzip zlib)
 
+add_executable(minizip
+        contrib/minizip/ioapi.c
+        contrib/minizip/minizip.c
+        contrib/minizip/mztools.c
+        contrib/minizip/unzip.c
+        contrib/minizip/zip.c
+        )
+target_link_libraries(minizip zlib)
+
+add_executable(miniunz
+        contrib/minizip/ioapi.c
+        contrib/minizip/miniunz.c
+        contrib/minizip/mztools.c
+        contrib/minizip/unzip.c
+        contrib/minizip/zip.c
+        )
+target_link_libraries(miniunz zlib)
+
+
 if(HAVE_OFF64_T)
     add_executable(example64 test/example.c)
     target_link_libraries(example64 zlib)

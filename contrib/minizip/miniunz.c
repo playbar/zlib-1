@@ -531,9 +531,7 @@ int do_extract_onefile(uf,filename,opt_extract_without_path,opt_overwrite,passwo
 }
 
 
-int main(argc,argv)
-    int argc;
-    char *argv[];
+int main(int argc, char *argv[])
 {
     const char *zipfilename=NULL;
     const char *filename_to_extract=NULL;
